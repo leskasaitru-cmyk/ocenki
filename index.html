@@ -41,7 +41,6 @@
     line-height: 1.5;
   }
 
-  /* ===== 3D ФОН ===== */
   .bg-3d {
     position: fixed;
     inset: 0;
@@ -89,7 +88,6 @@
     50%      { transform: translateY(-24px) scale(1.05); }
   }
 
-  /* ===== КОНТЕЙНЕР ===== */
   .container {
     max-width: 960px;
     margin: 0 auto;
@@ -97,7 +95,6 @@
     z-index: 2;
   }
 
-  /* ===== ШАПКА ===== */
   .header {
     display: flex;
     align-items: center;
@@ -129,7 +126,6 @@
     margin-top: 2px;
   }
 
-  /* ===== ВЕРХНЯЯ СВОДКА ===== */
   .top-stats {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -179,7 +175,6 @@
   .stat-card.s2::before { background: var(--neon-danger); }
   .stat-card.s2 .num { color: var(--neon-danger); }
 
-  /* ===== ТРЕВОЖНАЯ ПЛАШКА ===== */
   .alert-bar {
     border-radius: 10px;
     padding: 12px 18px;
@@ -207,7 +202,67 @@
     50% { opacity: 0.65; }
   }
 
-  /* ===== ПАНЕЛЬ ЦЕЛЕЙ ===== */
+  /* ===== ПОИСК ===== */
+  .search-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: var(--asphalt-1);
+    border: 1px solid var(--line-hi);
+    border-radius: 10px;
+    padding: 0 12px;
+    margin-bottom: 16px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .search-wrap:focus-within {
+    border-color: var(--neon);
+    box-shadow: 0 0 14px rgba(94, 234, 212, 0.2);
+  }
+  .search-icon {
+    font-size: 14px;
+    color: var(--text-dim);
+    margin-right: 8px;
+    flex-shrink: 0;
+  }
+  .search-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-hi);
+    font-size: 14px;
+    font-family: inherit;
+    padding: 12px 0;
+    letter-spacing: 0.3px;
+  }
+  .search-input::placeholder {
+    color: var(--text-dim);
+    font-style: italic;
+  }
+  .search-clear {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 15px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    transition: color 0.15s, background 0.15s;
+    display: none;
+  }
+  .search-clear.visible { display: block; }
+  .search-clear:hover {
+    color: var(--neon-danger);
+    background: rgba(248, 113, 113, 0.12);
+  }
+  .search-empty {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 13px;
+    font-style: italic;
+    padding: 20px 0;
+  }
+
   .targets-panel {
     background: var(--asphalt-1);
     border: 1px solid var(--line);
@@ -287,7 +342,6 @@
     border-color: var(--line);
   }
 
-  /* ===== ПРЕДМЕТЫ ===== */
   .subject {
     background: var(--asphalt-1);
     border: 1px solid var(--line);
@@ -472,7 +526,6 @@
     letter-spacing: 0.3px;
   }
 
-  /* ===== 3D ДОМИК ===== */
   .house-section {
     margin-top: 40px;
     padding: 30px 0 20px;
@@ -650,9 +703,7 @@
     color: var(--text-dim);
     margin-top: 10px;
     letter-spacing: 0.5px;
-  }
-
-  /* ===== АДАПТИВ ===== */
+  }  /* ===== АДАПТИВ ===== */
   @media (max-width: 620px) {
     body { padding: 12px; }
     .header-text h1 { font-size: 17px; }
@@ -758,6 +809,13 @@
 
   <div class="alert-bar" id="alertBar"></div>
 
+  <!-- ===== ПОИСК ===== -->
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" class="search-input" placeholder="Поиск по предметам..." autocomplete="off">
+    <button class="search-clear" id="searchClear" title="Очистить">✕</button>
+  </div>
+
   <div class="targets-panel">
     <h2>🎯 Что нужно получить</h2>
     <div class="targets-list" id="targetsList"></div>
@@ -814,8 +872,7 @@
     </div>
   </div>
   <p class="house-hint">Зажми и крути 🖱️</p>
-</div>
-<script>
+</div><script>
 // ===== НАСТРОЙКИ =====
 const TARGET_5 = 4.6;
 const TARGET_4 = 3.6;
@@ -891,12 +948,32 @@ function plural(n) {
   return 'предметов';
 }
 
+// ===== ПОИСК =====
+let searchQuery = '';
+function getFilteredSubjects() {
+  if (!searchQuery.trim()) return subjects;
+  const q = searchQuery.toLowerCase().trim();
+  return subjects.filter(s => s.name.toLowerCase().includes(q));
+}
+
 // ===== ОТРИСОВКА ПРЕДМЕТОВ =====
 function render() {
   const container = document.getElementById('subjects');
   container.innerHTML = '';
 
-  subjects.forEach((subj) => {
+  const filtered = getFilteredSubjects();
+
+  if (filtered.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'search-empty';
+    empty.textContent = '😔 Ничего не найдено по запросу "' + searchQuery + '"';
+    container.appendChild(empty);
+    renderTargets();
+    updateSummary();
+    return;
+  }
+
+  filtered.forEach((subj) => {
     const a = avg(subj.grades);
     const div = document.createElement('div');
     div.className = 'subject';
@@ -1062,6 +1139,27 @@ function resetAll() {
 // ===== СТАРТ =====
 load();
 render();
+
+// ===== ПОИСК =====
+(function() {
+  const input = document.getElementById('searchInput');
+  const clearBtn = document.getElementById('searchClear');
+  if (!input) return;
+
+  input.addEventListener('input', (e) => {
+    searchQuery = e.target.value;
+    clearBtn.classList.toggle('visible', searchQuery.length > 0);
+    render();
+  });
+
+  clearBtn.addEventListener('click', () => {
+    input.value = '';
+    searchQuery = '';
+    clearBtn.classList.remove('visible');
+    render();
+    input.focus();
+  });
+})();
 
 // ===== ИНТЕРАКТИВНЫЙ 3D-ДОМИК =====
 (function() {
