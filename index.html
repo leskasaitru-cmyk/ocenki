@@ -263,11 +263,13 @@
     padding: 20px 0;
   }
 
+  /* ===== ПАНЕЛЬ ЦЕЛЕЙ (теперь внизу) ===== */
   .targets-panel {
     background: var(--asphalt-1);
     border: 1px solid var(--line);
     border-radius: 12px;
     padding: 16px 18px;
+    margin-top: 18px;
     margin-bottom: 18px;
     position: relative;
   }
@@ -342,6 +344,7 @@
     border-color: var(--line);
   }
 
+  /* ===== ПРЕДМЕТЫ ===== */
   .subject {
     background: var(--asphalt-1);
     border: 1px solid var(--line);
@@ -703,17 +706,34 @@
     color: var(--text-dim);
     margin-top: 10px;
     letter-spacing: 0.5px;
-  }  /* ===== АДАПТИВ ===== */
+  }
+
+  /* ===== АДАПТИВ ===== */
   @media (max-width: 620px) {
     body { padding: 12px; }
     .header-text h1 { font-size: 17px; }
-    .top-stats { grid-template-columns: repeat(2, 1fr); }
+    .header-text p { font-size: 10.5px; letter-spacing: 1px; }
+    .top-stats { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .stat-card { padding: 12px 8px 10px; }
     .stat-card .num { font-size: 22px; }
+    .stat-card .lbl { font-size: 10px; letter-spacing: 0.7px; }
+
+    .search-input { font-size: 13.5px; padding: 11px 0; }
+
     .subject { padding: 13px 14px; }
+    .subject-name { font-size: 14px; }
     .grade { width: 32px; height: 32px; font-size: 13px; }
+    .avg { font-size: 15px; padding: 4px 10px; min-width: 54px; }
+    .controls button { padding: 6px 10px; font-size: 12.5px; }
+    .status { font-size: 11px; padding: 4px 9px; }
+
+    .targets-panel { padding: 14px 14px; }
     .targets-list { grid-template-columns: 1fr; }
-    .target-item { font-size: 12.5px; }
+    .target-item { font-size: 12.5px; padding: 8px 10px; }
     .tbadge { font-size: 11px; padding: 3px 8px; }
+
+    .summary { padding: 15px; }
+    .summary p { font-size: 13px; }
 
     .house-stage { height: 260px; }
     .house {
@@ -761,7 +781,6 @@
 </head>
 <body>
 
-<!-- ===== 3D ФОН ===== -->
 <div class="bg-3d">
   <div class="cube" style="top:10%; left:5%; animation-duration:22s;">
     <div class="face f1"></div><div class="face f2"></div>
@@ -778,7 +797,6 @@
   <div class="sphere" style="width:70px;height:70px;top:45%;left:3%;animation-delay:6s;"></div>
 </div>
 
-<!-- ===== КОНТЕНТ ===== -->
 <div class="container">
   <div class="header">
     <div class="flag"></div>
@@ -816,13 +834,16 @@
     <button class="search-clear" id="searchClear" title="Очистить">✕</button>
   </div>
 
+  <!-- ===== ПРЕДМЕТЫ (теперь здесь, сразу под поиском) ===== -->
+  <div id="subjects"></div>
+
+  <!-- ===== ПАНЕЛЬ ЦЕЛЕЙ (переехала вниз) ===== -->
   <div class="targets-panel">
     <h2>🎯 Что нужно получить</h2>
     <div class="targets-list" id="targetsList"></div>
   </div>
 
-  <div id="subjects"></div>
-
+  <!-- ===== ПОЛНАЯ СВОДКА ===== -->
   <div class="summary">
     <h2>📊 Полная сводка</h2>
     <p id="stat5"></p>
@@ -872,7 +893,9 @@
     </div>
   </div>
   <p class="house-hint">Зажми и крути 🖱️</p>
-</div><script>
+</div>
+
+<script>
 // ===== НАСТРОЙКИ =====
 const TARGET_5 = 4.6;
 const TARGET_4 = 3.6;
